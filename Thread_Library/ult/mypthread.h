@@ -1,14 +1,26 @@
 #ifndef H_MYPTHREAD
 #define H_MYPTHREAD
 
+#include <ucontext.h>
+
+//Definitions
+#define MAXTHREADS	512
+#define STACKSIZE	16384
+#define threadCount	16384
+
 // Types
 typedef struct {
 	// Define any fields you might need inside here.
-} mypthread_t;
+} mypthread_attr_t;
 
 typedef struct {
-	// Define any fields you might need inside here.
-} mypthread_attr_t;
+	int active;
+	int executing;
+	int joined;
+	int id;
+	ucontext_t context;
+	mypthread_t parent;
+} mypthread_t;
 
 // Functions
 int mypthread_create(mypthread_t *thread, const mypthread_attr_t *attr,
@@ -20,6 +32,11 @@ int mypthread_yield(void);
 
 int mypthread_join(mypthread_t thread, void **retval);
 
+void initTable();
+
+//Environment Variables 
+int tableCreated;
+mypthread_t *table[MAXTHREADS];
 
 /* Don't touch anything after this line.
  *
