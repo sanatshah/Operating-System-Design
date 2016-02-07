@@ -115,6 +115,7 @@ void * fncheck( void *arg )
         mypthread_yield( );
     }
 
+	printf("before seg");
     mypthread_exit( 0 );
 
     return 0;
@@ -149,8 +150,8 @@ int main( int argc, char **argv )
 
     pList = (int *) malloc( sizeof( int ) * nListSize );
     for( i = 0; i < nListSize; i++ )
-//        pList[i] = random( ) % (nListSize<<1);   // random list
-        pList[i] = nListSize-i;   // decreasing list  (easier to debug)
+	  pList[i] = random( ) % (nListSize<<1);   // random list
+    //    pList[i] = nListSize-i;   // decreasing list  (easier to debug)
 
     printf( "[BEFORE] The list is NOT sorted:\n" );
     printList( pList, nListSize );
@@ -184,13 +185,16 @@ int main( int argc, char **argv )
         exit( 1 );
     }
 
+
     ///////////
     // Waiting the threads to complete the sorting
     //////////
     printf( "waiting...\n" );
 
-    for( i = 0; i < nListSize-1; i++ )
+    for( i = 0; i < nListSize-1; i++ ){
         mypthread_join( threads[i], 0 );
+	printf("before seg");
+	}
     mypthread_join( thrcheck, 0 );
 
     for( i = 0; i < nListSize; i++ )

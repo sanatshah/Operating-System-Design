@@ -22,7 +22,7 @@ struct 	mypthread_t{
 	int id;
 	ucontext_t context;
 	mypthread_t *parent;
-	struct mythread *joinedThread;
+	mypthread_t *joinedThread;
 };
 
 // Functions

@@ -21,7 +21,6 @@ int mypthread_create(mypthread_t *thread, const mypthread_attr_t *attr,
 		table[0]->executing = 1;
 		if(getcontext(&table[0]->context) == -1)
 		{
-			printf("ERROREROROORER");
 			perror("getcontext error");
 			return -1;	//error
 		}
@@ -121,7 +120,7 @@ int mypthread_yield(void){
 
 	curr = newThread;
 
-	//switch threads
+	//switch to different thread
 	if(setcontext(&(curr->context)) == -1){
 		return -1;
 	}
@@ -135,8 +134,11 @@ int mypthread_join(mypthread_t thread, void **retval){
 	//what to do with retval?
 	int i;
 	mypthread_t *currThread = curr;
-	printf("%d", thread.id);
+	printf("curr id: %d\n", curr->id);
 	mypthread_t *joiningThread = table[thread.id];
+
+
+	// added a current active thread
 
 	/*	
 	//find current thread. Probably can optimize by keeping track of current active thread
@@ -173,19 +175,32 @@ int mypthread_join(mypthread_t thread, void **retval){
 	}
 	
 	currThread->joinedThread = joiningThread;
-	joiningThread->parent=currThread;
 	currThread->joined=1;
+	currThread->active=0;
 	currThread->runnable = 0;
 
+	joiningThread->parent=currThread;
+	joiningThread->active=1;
+
+	printf("currThread id: %d\n",currThread->id);
+	printf("joiningThread id: %d\n",joiningThread->id);
+	curr=joiningThread;
+
 	//yo I comented this while loop out and it stopped seg faulting and outputs the right answer
-
+	/*
 	//waiting for thread to finish
+	while(joiningThread->active)
+	{
+		mypthread_yield();
+	}
+	*/
 
+	if(swapcontext(&(currThread->context), &(joiningThread->context)) == -1) {
+		perror("Can't swith to joined thread");
+		return -1;
+	}
 
-	currThread->joinedThread = NULL;
-	currThread->runnable = 1;
-	currThread->joined = 0;
-	
+	printf("after swap");	
 	return 0;
 }
 
