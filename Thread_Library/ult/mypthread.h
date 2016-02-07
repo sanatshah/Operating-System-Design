@@ -43,7 +43,7 @@ mypthread_t* find(int paused, int joined);
 int tableCreated;
 mypthread_t *table[MAXTHREADS];
 static int numThreads = 1;
-static mypthread_t *curr;
+static mypthread_t* curr;
 
 
 /* Don't touch anything after this line.

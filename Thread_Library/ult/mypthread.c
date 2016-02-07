@@ -13,17 +13,19 @@ int mypthread_create(mypthread_t *thread, const mypthread_attr_t *attr,
 		initTable();
 		//create main thread
 		mypthread_t *mainThread = (mypthread_t *) malloc(sizeof(mypthread_t));
-		numThreads++;
 		table[0] = mainThread;
 		table[0]->paused=0;
 		table[0]->id = 0;
+		table[0]->joined = 0;
 		table[0]->active = 1;
 		table[0]->executing = 1;
 		if(getcontext(&table[0]->context) == -1)
 		{
+			printf("ERROREROROORER");
 			perror("getcontext error");
 			return -1;	//error
 		}
+		curr = table[0];
 	}
 	for(i = 1; i < MAXTHREADS; i++)
 	{
@@ -31,8 +33,9 @@ int mypthread_create(mypthread_t *thread, const mypthread_attr_t *attr,
 		{
 			numThreads++;
 			table[i] = thread;
-			table[i]->active = 1;
+			table[i]->active = 0;
 			table[i]->paused=0;
+			table[i]->joined=0;
 			table[i]->id = i;
 			if(getcontext(&table[i]->context) == -1)
 			{
@@ -52,6 +55,9 @@ int mypthread_create(mypthread_t *thread, const mypthread_attr_t *attr,
 void mypthread_exit(void *retval){
 
 	numThreads--;
+	curr->active=0;
+	curr->joined=0;
+	curr->paused=0;
 
 	//if the number of threads is 0 then exit 
 	if (numThreads==0){
@@ -117,7 +123,7 @@ int mypthread_yield(void){
 
 	//switch threads
 	if(setcontext(&(curr->context)) == -1){
-		//throw error
+		return -1;
 	}
 
 	return 0;
@@ -128,9 +134,11 @@ int mypthread_join(mypthread_t thread, void **retval){
 
 	//what to do with retval?
 	int i;
-	mypthread_t *currThread = NULL;
+	mypthread_t *currThread = curr;
+	printf("%d", thread.id);
 	mypthread_t *joiningThread = table[thread.id];
-	
+
+	/*	
 	//find current thread. Probably can optimize by keeping track of current active thread
 	for(i = 0; i < MAXTHREADS; i++)
 	{
@@ -140,16 +148,21 @@ int mypthread_join(mypthread_t thread, void **retval){
 			break;
 		}
 	}
+	*/
+
 	//Is this error check necessary
 	if(currThread == NULL)
 	{
-		perror("Cannot find active thread");
-		return -1;
+//		perror("Cannot find active thread");
+//		return -1;
+
+		
 	}
 	//if thread is already joined
 	if(joiningThread->joined)
 	{
-		perror("Cannot join thread");
+		perror("First, cannot join thread");
+		printf("%d",joiningThread->id);
 		return -1;
 	}
 	//if thread already joined calling thread
@@ -160,15 +173,15 @@ int mypthread_join(mypthread_t thread, void **retval){
 	}
 	
 	currThread->joinedThread = joiningThread;
+	joiningThread->parent=currThread;
 	currThread->joined=1;
 	currThread->runnable = 0;
-	
+
+	//yo I comented this while loop out and it stopped seg faulting and outputs the right answer
+
 	//waiting for thread to finish
-	while(joiningThread->active)
-	{
-		mypthread_yield();
-	}
-	
+
+
 	currThread->joinedThread = NULL;
 	currThread->runnable = 1;
 	currThread->joined = 0;
