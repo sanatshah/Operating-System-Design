@@ -1,6 +1,5 @@
 #ifndef H_MYPTHREAD
 #define H_MYPTHREAD
-
 #include <ucontext.h>
 
 //Definitions
@@ -17,9 +16,12 @@ typedef struct {
 	int active;
 	int executing;
 	int joined;
+	int paused;
+	int runnable;
 	int id;
 	ucontext_t context;
 	mypthread_t parent;
+	struct mythread *joinedThread;
 } mypthread_t;
 
 // Functions
@@ -34,9 +36,14 @@ int mypthread_join(mypthread_t thread, void **retval);
 
 void initTable();
 
+mypthread_t find(int paused, int joined);
+
 //Environment Variables 
 int tableCreated;
 mypthread_t *table[MAXTHREADS];
+static int numThreads = 1;
+static mypthread_t *curr;
+
 
 /* Don't touch anything after this line.
  *
