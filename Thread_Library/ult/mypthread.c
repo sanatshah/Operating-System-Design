@@ -1,5 +1,6 @@
 #include "mypthread.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 int mypthread_create(mypthread_t *thread, const mypthread_attr_t *attr,
                         void *(*start_routine) (void *), void *arg){
@@ -69,10 +70,10 @@ void mypthread_exit(void *retval){
 
 }
 
-pthread_t find(int paused, int joined){
+mypthread_t *find(int paused, int joined){
 	int i=0; 
 	int foundPaused=0;
-	mypthread_t foundThread;
+	mypthread_t *foundThread;
 
 	for(i = 0;i < MAXTHREADS; i++){
 		if (paused==1){
@@ -102,8 +103,8 @@ pthread_t find(int paused, int joined){
 int mypthread_yield(void){
 
 	//find a thread to start
-	mypthread_t newThread = find(0,0);
-	mypthread_t oldThread = curr;
+	mypthread_t* newThread = find(0,0);
+	mypthread_t* oldThread = curr;
 
 	//change thread variables
 	curr->paused=1;
