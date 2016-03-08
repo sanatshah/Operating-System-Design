@@ -5,7 +5,6 @@
 //Definitions
 #define MAXTHREADS	512
 #define STACKSIZE	16384
-#define threadCount	16384
 
 // Types
 typedef struct {
@@ -14,15 +13,12 @@ typedef struct {
 
 typedef struct mypthread_t mypthread_t;
 struct 	mypthread_t{
-	int active;
-	int executing;
-	int joined;
-	int paused;
-	int runnable;
 	int id;
+	int active;		//0 = not active, 1 = paused, 2 = running
+	int blocked;		//blocked means its waiting for a thread to exit
+	int joined;		//if someone joins me
 	ucontext_t context;
-	mypthread_t *parent;
-	mypthread_t *joinedThread;
+	mypthread_t *joinedThread; 	/*this is the pointer to the thread that joined me*/
 };
 
 // Functions
@@ -37,12 +33,12 @@ int mypthread_join(mypthread_t thread, void **retval);
 
 void initTable();
 
-mypthread_t* find(int paused, int joined);
+mypthread_t* find();
 
 //Environment Variables 
 int tableCreated;
 mypthread_t *table[MAXTHREADS];
-static int numThreads = 1;
+static int numThreads = 0;
 static mypthread_t* curr;
 
 
